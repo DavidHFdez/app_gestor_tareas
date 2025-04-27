@@ -1,0 +1,121 @@
+<!-- Encabezado con botón de logout -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+  <h2>Gestión de Tareas</h2>
+  <button class="logout" (click)="logout()">Cerrar sesión</button>
+</div>
+
+<!-- Formulario para agregar tarea -->
+<form (ngSubmit)="agregarTarea()">
+  <input type="text" [(ngModel)]="nuevaTarea.titulo" name="titulo" required placeholder="Título">
+  <input type="text" [(ngModel)]="nuevaTarea.descripcion" name="descripcion" required placeholder="Descripción">
+  <input type="date" [(ngModel)]="nuevaTarea.fechaVencimiento" name="fechaVencimiento">
+  <input type="text" [(ngModel)]="nuevaTarea.categoria" name="categoria" required placeholder="Categoría">
+
+  <select [(ngModel)]="nuevaTarea.estado" name="estado">
+    <option value="pendiente">Pendiente</option>
+    <option value="en progreso">En progreso</option>
+    <option value="completada">Completada</option>
+  </select>
+
+  <select [(ngModel)]="nuevaTarea.prioridad" name="prioridad">
+    <option value="baja">Baja</option>
+    <option value="media">Media</option>
+    <option value="alta">Alta</option>
+  </select>
+
+  <button type="submit">Crear Tarea</button>
+</form>
+
+<!-- Filtros -->
+<div class="filtros">
+  <label>Título:
+    <input type="text" [(ngModel)]="filtros.titulo" (input)="aplicarFiltrosYOrden()" placeholder="Buscar por título">
+  </label>
+  
+  <label>Estado:
+    <select [(ngModel)]="filtros.estado" (change)="aplicarFiltrosYOrden()">
+      <option value="">Todos</option>
+      <option value="pendiente">Pendiente</option>
+      <option value="en progreso">En progreso</option>
+      <option value="completada">Completada</option>
+    </select>
+  </label>
+
+  <label>Categoría:
+    <input type="text" [(ngModel)]="filtros.categoria" (input)="aplicarFiltrosYOrden()" placeholder="Buscar categoría">
+  </label>
+
+  <label>Ordenar por:
+    <select [(ngModel)]="orden" (change)="aplicarFiltrosYOrden()">
+      <option value="">Sin orden</option>
+      <option value="fecha">Fecha vencimiento</option>
+      <option value="prioridad">Prioridad</option>
+    </select>
+  </label>
+</div>
+
+<!-- Lista de tareas -->
+<table>
+  <thead>
+    <tr>
+      <th>Título</th>
+      <th>Descripción</th>
+      <th>Fecha creación</th>
+      <th>Fecha vencimiento</th>
+      <th>Categoría</th>
+      <th>Estado</th>
+      <th>Prioridad</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let tarea of tareasFiltradas">
+      <ng-container *ngIf="tareaEnEdicion?.id !== tarea.id; else modoEdicion">
+        <td>{{ tarea.titulo }}</td>
+        <td>{{ tarea.descripcion }}</td>
+        <td>{{ tarea.fechaCreacion | date:'dd/MM/yyyy' }}</td>
+        <td>{{ tarea.fechaVencimiento | date:'dd/MM/yyyy' }}</td>
+        <td>{{ tarea.categoria }}</td>
+        <td>
+          <span class="badge" [ngClass]="getClaseEstado(tarea.estado)">
+            {{ tarea.estado }}
+          </span>
+        </td>
+        <td>
+          <span class="badge" [ngClass]="getClasePrioridad(tarea.prioridad)">
+            {{ tarea.prioridad }}
+          </span>
+        </td>
+        <td>
+          <button (click)="editarTarea(tarea)">✏️</button>
+          <button (click)="eliminarTarea(tarea.id)">🗑️</button>
+        </td>
+      </ng-container>
+      <ng-template #modoEdicion>
+        <td><input [(ngModel)]="tareaEnEdicion.titulo"></td>
+        <td><input [(ngModel)]="tareaEnEdicion.descripcion"></td>
+        <td>{{ tarea.fechaCreacion | date:'dd/MM/yyyy' }}</td>
+        <td><input type="date" [(ngModel)]="tareaEnEdicion.fechaVencimiento"></td>
+        <td><input [(ngModel)]="tareaEnEdicion.categoria"></td>
+        <td>
+          <select [(ngModel)]="tareaEnEdicion.estado">
+            <option value="pendiente">Pendiente</option>
+            <option value="en progreso">En progreso</option>
+            <option value="completada">Completada</option>
+          </select>
+        </td>
+        <td>
+          <select [(ngModel)]="tareaEnEdicion.prioridad">
+            <option value="baja">Baja</option>
+            <option value="media">Media</option>
+            <option value="alta">Alta</option>
+          </select>
+        </td>
+        <td>
+          <button (click)="guardarCambios()">💾</button>
+          <button (click)="tareaEnEdicion = null">❌</button>
+        </td>
+      </ng-template>
+    </tr>
+  </tbody>
+</table>
